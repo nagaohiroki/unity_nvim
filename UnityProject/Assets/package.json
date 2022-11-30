@@ -1,0 +1,12 @@
+{
+  "name": "com.github.nagaohiroki.unity-nvim",
+  "displayName": "NeovimExternalEditor",
+  "version": "0.1.0",
+  "unity": "2021.3.14f1",
+  "description": "neovim",
+  "keywords": [ "ide", "editor" ],
+  "category": "editor extensions",
+  "dependencies": {},
+  "samples": [
+  ]
+}
