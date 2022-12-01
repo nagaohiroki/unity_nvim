@@ -1,5 +1,5 @@
 {
-    "name": "NeocimExternalCodeEditor",
+    "name": "NeovimExternalCodeEditor",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [
