@@ -1,7 +1,7 @@
 {
-  "name": "com.github.nagaohiroki.unity-nvim",
+  "name": "com.github.nagaohiroki.unity_nvim",
   "displayName": "NeovimExternalEditor",
   "version": "1.0.0",
-  "unity": "2018.3",
-  "description": "neovim"
+  "description": "neovim",
+  "unity": "2019.1"
 }
