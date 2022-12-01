@@ -1,5 +1,5 @@
 {
-    "name": "NeovimExternalCodeEditor",
+    "name": "Unity.unity_nvim.Editor",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [
