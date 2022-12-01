@@ -20,7 +20,7 @@ arguments:$(File) +$(Line)
 visual studio:C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe
 
 macos:
-execute:
+execute:/opt/homebrew/bin/nvim-qt
 arguments:$(File) +$(Line)
-visual studio:
+visual studio:/Applications/Visual Studio.app
 ```
