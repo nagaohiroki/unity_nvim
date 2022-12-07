@@ -60,18 +60,24 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		Process.Start(info);
 		return true;
 	}
-	public void SyncAll()
-	{
-		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString("nvim_vs_path"));
-		CodeEditor.Editor.CurrentCodeEditor.SyncAll();
-		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString("nvim_cmd"));
-	}
+	public void SyncAll() { }
 	public void SyncIfNeeded(string[] addedFiles, string[] deletedFiles, string[] movedFiles, string[] movedFromFiles, string[] importedFiles)
 	{
 		if(IsCodeAssets(addedFiles) || IsCodeAssets(deletedFiles) || IsCodeAssets(movedFiles) || IsCodeAssets(movedFromFiles) || IsCodeAssets(importedFiles))
 		{
-			SyncAll();
+			Sync();
 		}
+	}
+	public bool TryGetInstallationForPath(string editorPath, out CodeEditor.Installation installation)
+	{
+		installation = Installations[0];
+		return true;
+	}
+	private void Sync()
+	{
+		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString("nvim_vs_path"));
+		CodeEditor.Editor.CurrentCodeEditor.SyncAll();
+		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString("nvim_cmd"));
 	}
 	bool IsCodeAssets(string[] files)
 	{
@@ -83,10 +89,5 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 			}
 		}
 		return false;
-	}
-	public bool TryGetInstallationForPath(string editorPath, out CodeEditor.Installation installation)
-	{
-		installation = Installations[0];
-		return true;
 	}
 }
