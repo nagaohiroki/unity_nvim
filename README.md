@@ -10,9 +10,9 @@ Window -> Package Manager -> Add package from git URL...
 https://github.com/nagaohiroki/unity_nvim.git?path=unity_nvim/Assets
 ```
 
-## Setting Option
+## Setup
 
-Preference... ->  External Script Edtior -> nvim-qt  
+Preference... ->  External Tools -> External Script Edtior -> nvim-qt  
 ```
 Windows:
 execute:D:\nvim-win64\Neovim\bin\nvim-qt.exe
