@@ -33,6 +33,10 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	}
 	public bool OpenProject(string filePath, int line, int column)
 	{
+		if(!IsCodeAsset(filePath))
+		{
+			return false;
+		}
 		var args = EditorPrefs.GetString(keyNvimArgs).
 			Replace("$(File)", filePath).
 			Replace("$(Line)", Mathf.Max(0, line).ToString()).
