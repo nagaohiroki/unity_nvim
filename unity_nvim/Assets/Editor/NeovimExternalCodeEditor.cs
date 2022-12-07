@@ -1,66 +1,50 @@
-﻿using Unity.CodeEditor;
+﻿using System.IO;
+using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
-using System.IO;
-using System.Diagnostics;
+using Unity.CodeEditor;
 [InitializeOnLoad]
 public class NeovimExternalCodeEditor : IExternalCodeEditor
 {
-	static NeovimExternalCodeEditor()
-	{
-		CodeEditor.Register(new NeovimExternalCodeEditor());
-	}
+	const string keyNvimCmd = "nvim_cmd";
+	const string keyNvimArgs = "nvim_args";
+	const string keyNvimVisualStudioPath = "nvim_vs_path";
 	public CodeEditor.Installation[] Installations => new[]
 	{
 		new CodeEditor.Installation
 		{
-			Name ="nvim-qt",
-			Path = EditorPrefs.GetString("nvim_cmd")
+			Name = "nvim-qt",
+			Path = EditorPrefs.GetString(keyNvimCmd)
 		}
 	};
-	public void Initialize(string editorInstallationPath)
+	static NeovimExternalCodeEditor()
 	{
+		CodeEditor.Register(new NeovimExternalCodeEditor());
 	}
+	public void Initialize(string editorInstallationPath) { }
+	public void SyncAll() { }
 	public void OnGUI()
 	{
 		EditorGUILayout.BeginVertical();
-
-		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("execute");
-		EditorPrefs.SetString("nvim_cmd", EditorGUILayout.TextField(EditorPrefs.GetString("nvim_cmd")));
-		EditorGUILayout.EndHorizontal();
-
-		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("arguments");
-		EditorPrefs.SetString("nvim_args", EditorGUILayout.TextField(EditorPrefs.GetString("nvim_args")));
-		EditorGUILayout.EndHorizontal();
-
-		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("visual studio");
-		EditorPrefs.SetString("nvim_vs_path", EditorGUILayout.TextField(EditorPrefs.GetString("nvim_vs_path")));
-		EditorGUILayout.EndHorizontal();
-
+		ItemGUI("execute", keyNvimCmd);
+		ItemGUI("arguments", keyNvimArgs);
+		ItemGUI("visual studio", keyNvimVisualStudioPath);
 		EditorGUILayout.EndVertical();
-	}
-	bool IsCodeAsset(string filePath)
-	{
-		return Path.GetExtension(filePath) == ".cs";
 	}
 	public bool OpenProject(string filePath, int line, int column)
 	{
-		var args = EditorPrefs.GetString("nvim_args").
+		var args = EditorPrefs.GetString(keyNvimArgs).
 			Replace("$(File)", filePath).
 			Replace("$(Line)", Mathf.Max(0, line).ToString()).
 			Replace("$(Column)", Mathf.Max(0, column).ToString());
 		var info = new ProcessStartInfo();
-		info.FileName = EditorPrefs.GetString("nvim_cmd");
+		info.FileName = EditorPrefs.GetString(keyNvimCmd);
 		info.CreateNoWindow = false;
 		info.UseShellExecute = false;
 		info.Arguments = args;
 		Process.Start(info);
 		return true;
 	}
-	public void SyncAll() { }
 	public void SyncIfNeeded(string[] addedFiles, string[] deletedFiles, string[] movedFiles, string[] movedFromFiles, string[] importedFiles)
 	{
 		if(IsCodeAssets(addedFiles) || IsCodeAssets(deletedFiles) || IsCodeAssets(movedFiles) || IsCodeAssets(movedFromFiles) || IsCodeAssets(importedFiles))
@@ -73,11 +57,18 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		installation = Installations[0];
 		return true;
 	}
-	private void Sync()
+	void ItemGUI(string label, string key)
 	{
-		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString("nvim_vs_path"));
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField(label);
+		EditorPrefs.SetString(key, EditorGUILayout.TextField(EditorPrefs.GetString(key)));
+		EditorGUILayout.EndHorizontal();
+	}
+	void Sync()
+	{
+		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString(keyNvimVisualStudioPath));
 		CodeEditor.Editor.CurrentCodeEditor.SyncAll();
-		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString("nvim_cmd"));
+		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString(keyNvimCmd));
 	}
 	bool IsCodeAssets(string[] files)
 	{
@@ -90,4 +81,5 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		}
 		return false;
 	}
+	bool IsCodeAsset(string filePath) => Path.GetExtension(filePath) == ".cs";
 }
