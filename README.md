@@ -1,25 +1,25 @@
 # unity_nvim
 
-open script nvim
+Unity on nvim-qt
 
+
+## Install Package
+
+Window -> Package Manager -> Add package from git URL...
 ```
 https://github.com/nagaohiroki/unity_nvim.git?path=unity_nvim/Assets
-
 ```
 
-or add Packages\manifest.json
+## Setting Option
 
+Preference... ->  External Script Edtior -> nvim-qt  
 ```
-"com.github.nagaohiroki.unity_nvim": "https://github.com/nagaohiroki/unity_nvim.git?path=unity_nvim/Assets"
-```
-
-```
-windows:
+Windows:
 execute:D:\nvim-win64\Neovim\bin\nvim-qt.exe
 arguments:$(File) +$(Line)
 visual studio:C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe
 
-macos:
+Mac:
 execute:/opt/homebrew/bin/nvim-qt
 arguments:$(File) +$(Line)
 visual studio:/Applications/Visual Studio.app
