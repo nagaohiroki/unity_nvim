@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using System.Diagnostics;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Unity.CodeEditor;
@@ -26,9 +26,9 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	public void OnGUI()
 	{
 		EditorGUILayout.BeginVertical();
-		ItemGUI("execute", keyNvimCmd);
-		ItemGUI("arguments", keyNvimArgs);
-		ItemGUI("visual studio", keyNvimVisualStudioPath);
+		ItemGUI("Execute", keyNvimCmd);
+		ItemGUI("Arguments", keyNvimArgs);
+		PopupVisualStudio();
 		EditorGUILayout.EndVertical();
 	}
 	public bool OpenProject(string filePath, int line, int column)
@@ -41,12 +41,12 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 			Replace("$(File)", filePath).
 			Replace("$(Line)", Mathf.Max(0, line).ToString()).
 			Replace("$(Column)", Mathf.Max(0, column).ToString());
-		var info = new ProcessStartInfo();
+		var info = new System.Diagnostics.ProcessStartInfo();
 		info.FileName = EditorPrefs.GetString(keyNvimCmd);
 		info.CreateNoWindow = false;
 		info.UseShellExecute = false;
 		info.Arguments = args;
-		Process.Start(info);
+		System.Diagnostics.Process.Start(info);
 		return true;
 	}
 	public void SyncIfNeeded(string[] addedFiles, string[] deletedFiles, string[] movedFiles, string[] movedFromFiles, string[] importedFiles)
@@ -86,4 +86,20 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		return false;
 	}
 	bool IsCodeAsset(string filePath) => Path.GetExtension(filePath) == ".cs";
+	void PopupVisualStudio()
+	{
+		var list = new List<string>();
+		const string vs = "Visual Studio";
+		var paths = CodeEditor.Editor.GetFoundScriptEditorPaths();
+		foreach(var path in paths)
+		{
+			if(path.Value.Contains(vs))
+			{
+				list.Add(path.Key);
+			}
+		}
+		int index = list.IndexOf(EditorPrefs.GetString(keyNvimVisualStudioPath));
+		int newIndex = EditorGUILayout.Popup(vs, index, list.ToArray());
+		EditorPrefs.SetString(keyNvimVisualStudioPath, list[newIndex]);
+	}
 }
