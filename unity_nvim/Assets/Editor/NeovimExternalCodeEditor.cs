@@ -29,6 +29,10 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		ItemGUI("Execute", keyNvimCmd);
 		ItemGUI("Arguments", keyNvimArgs);
 		PopupVisualStudio();
+		if(GUILayout.Button("Regenerate project files"))
+		{
+			Sync();
+		}
 		EditorGUILayout.EndVertical();
 	}
 	public bool OpenProject(string filePath, int line, int column)
