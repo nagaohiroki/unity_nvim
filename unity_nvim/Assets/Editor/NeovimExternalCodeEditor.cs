@@ -1,14 +1,15 @@
 ﻿using System.IO;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Unity.CodeEditor;
+using Microsoft.Unity.VisualStudio.Editor;
 [InitializeOnLoad]
 public class NeovimExternalCodeEditor : IExternalCodeEditor
 {
 	const string keyNvimCmd = "nvim_cmd";
 	const string keyNvimArgs = "nvim_args";
 	const string keyNvimVisualStudioPath = "nvim_vs_path";
+	IGenerator _generator = new ProjectGeneration();
 	public CodeEditor.Installation[] Installations => new[]
 	{
 		new CodeEditor.Installation
@@ -28,7 +29,6 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		EditorGUILayout.BeginVertical();
 		ItemGUI("Execute", keyNvimCmd);
 		ItemGUI("Arguments", keyNvimArgs);
-		PopupVisualStudio();
 		if(GUILayout.Button("Regenerate project files"))
 		{
 			Sync();
@@ -90,20 +90,4 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		return false;
 	}
 	bool IsCodeAsset(string filePath) => Path.GetExtension(filePath) == ".cs";
-	void PopupVisualStudio()
-	{
-		var list = new List<string>();
-		const string vs = "Visual Studio";
-		var paths = CodeEditor.Editor.GetFoundScriptEditorPaths();
-		foreach(var path in paths)
-		{
-			if(path.Value.Contains(vs))
-			{
-				list.Add(path.Key);
-			}
-		}
-		int index = list.IndexOf(EditorPrefs.GetString(keyNvimVisualStudioPath));
-		int newIndex = EditorGUILayout.Popup(vs, index, list.ToArray());
-		EditorPrefs.SetString(keyNvimVisualStudioPath, list[newIndex]);
-	}
 }
