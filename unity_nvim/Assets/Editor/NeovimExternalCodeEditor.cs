@@ -8,7 +8,6 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 {
 	const string keyNvimCmd = "nvim_cmd";
 	const string keyNvimArgs = "nvim_args";
-	const string keyNvimVisualStudioPath = "nvim_vs_path";
 	IGenerator _generator = new ProjectGeneration();
 	public CodeEditor.Installation[] Installations => new[]
 	{
@@ -51,6 +50,7 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		info.UseShellExecute = false;
 		info.Arguments = args;
 		System.Diagnostics.Process.Start(info);
+		Sync();
 		return true;
 	}
 	public void SyncIfNeeded(string[] addedFiles, string[] deletedFiles, string[] movedFiles, string[] movedFromFiles, string[] importedFiles)
@@ -74,9 +74,7 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	}
 	void Sync()
 	{
-		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString(keyNvimVisualStudioPath));
-		CodeEditor.Editor.CurrentCodeEditor.SyncAll();
-		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString(keyNvimCmd));
+		_generator.Sync();
 	}
 	bool IsCodeAssets(string[] files)
 	{
@@ -89,5 +87,8 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		}
 		return false;
 	}
-	bool IsCodeAsset(string filePath) => Path.GetExtension(filePath) == ".cs";
+	bool IsCodeAsset(string filePath)
+	{
+		return Path.GetExtension(filePath) == ".cs";
+	}
 }
