@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Unity.CodeEditor;
@@ -8,13 +10,7 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	const string nvimName = "nvim-qt";
 	const string keyNvimCmd = "nvim_cmd";
 	const string keyNvimArgs = "nvim_args";
-	readonly string[] vsNames = new[]
-	{
-		"Visual Studio Community 2022 [17.5.3]",
-		"Visual Studio Community 2019 [16.11.25]",
-		"Visual Studio Community 2017 [15.9.53]",
-		"Visual Studio for Mac [8.10.18]"
-	};
+	const string keyNvimVS = "nvim_vs";
 	public CodeEditor.Installation[] Installations => new[]
 	{
 		new CodeEditor.Installation
@@ -35,11 +31,39 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	public void OnGUI()
 	{
 		EditorGUILayout.BeginVertical();
-		ItemGUI("Arguments", keyNvimArgs);
-		if(GUILayout.Button("Regenerate project files"))
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Arguments");
+		EditorPrefs.SetString(keyNvimArgs, EditorGUILayout.TextField(EditorPrefs.GetString(keyNvimArgs)));
+		EditorGUILayout.EndHorizontal();
+		var paths = CodeEditor.Editor.GetFoundScriptEditorPaths();
+		var vs = EditorPrefs.GetString(keyNvimVS);
+		var vsList = new List<string>();
+		var vsPathList = new List<string>();
+		int index = 0;
+		foreach(var path in paths)
+		{
+			if(path.Value.Contains("Visual Studio"))
+			{
+				if(path.Key == vs)
+				{
+					index = vsList.Count;
+				}
+				vsPathList.Add(path.Key);
+				vsList.Add(path.Value);
+			}
+		}
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Visual Studio");
+		index = EditorGUILayout.Popup(index, vsList.ToArray());
+		EditorPrefs.SetString(keyNvimVS, vsPathList[index]);
+		EditorGUILayout.EndHorizontal();
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Generate");
+		if(GUILayout.Button("Regenerate"))
 		{
 			Sync();
 		}
+		EditorGUILayout.EndHorizontal();
 		EditorGUILayout.EndVertical();
 	}
 	public bool OpenProject(string filePath, int line, int column)
@@ -82,33 +106,17 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		installation = default;
 		return false;
 	}
-	void ItemGUI(string label, string key)
-	{
-		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField(label);
-		EditorPrefs.SetString(key, EditorGUILayout.TextField(EditorPrefs.GetString(key)));
-		EditorGUILayout.EndHorizontal();
-	}
 	void Sync()
 	{
-		CodeEditor.SetExternalScriptEditor(GetVSPath());
+		var vs = EditorPrefs.GetString(keyNvimVS);
+		if(string.IsNullOrEmpty(vs))
+		{
+			Debug.Log("No Visual Studio found.");
+			return;
+		}
+		CodeEditor.SetExternalScriptEditor(vs);
 		CodeEditor.Editor.CurrentCodeEditor.SyncAll();
 		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString(keyNvimCmd));
-	}
-	string GetVSPath()
-	{
-		var paths = CodeEditor.Editor.GetFoundScriptEditorPaths();
-		foreach(var vs in vsNames)
-		{
-			foreach(var path in paths)
-			{
-				if(path.Value == vs)
-				{
-					return path.Key;
-				}
-			}
-		}
-		return null;
 	}
 	bool IsCodeAssets(string[] files)
 	{
