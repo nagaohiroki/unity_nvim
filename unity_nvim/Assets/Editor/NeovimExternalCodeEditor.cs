@@ -12,7 +12,8 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	{
 		"Visual Studio Community 2022 [17.5.3]",
 		"Visual Studio Community 2019 [16.11.25]",
-		"Visual Studio Community 2017 [15.9.53]"
+		"Visual Studio Community 2017 [15.9.53]",
+		"Visual Studio for Mac [8.10.18]"
 	};
 	public CodeEditor.Installation[] Installations => new[]
 	{
