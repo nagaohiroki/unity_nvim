@@ -77,12 +77,21 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 			Replace("$(Line)", Mathf.Max(0, line).ToString()).
 			Replace("$(Column)", Mathf.Max(0, column).ToString());
 		var info = new System.Diagnostics.ProcessStartInfo();
-		info.FileName = EditorPrefs.GetString(keyNvimCmd);
+		info.FileName = GetNvimExe();
 		info.CreateNoWindow = false;
 		info.UseShellExecute = false;
 		info.Arguments = args;
 		System.Diagnostics.Process.Start(info);
 		return true;
+	}
+	string GetNvimExe()
+	{
+		var exe = EditorPrefs.GetString(keyNvimCmd);
+		if(exe.EndsWith(".app"))
+		{
+			return Path.Combine(exe, "Contents", "MacOS", Path.GetFileNameWithoutExtension(exe));
+		}
+		return exe;
 	}
 	public void SyncIfNeeded(string[] addedFiles, string[] deletedFiles, string[] movedFiles, string[] movedFromFiles, string[] importedFiles)
 	{
