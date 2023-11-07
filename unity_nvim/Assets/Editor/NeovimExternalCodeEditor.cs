@@ -10,6 +10,9 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	const string keyNvimCmd = "nvim_cmd";
 	const string keyNvimArgs = "nvim_args";
 	const string keyNvimVS = "nvim_vs";
+	const string keyNvimExt = "nvim_ext";
+	const string defaultExt = ".cs,.shader,.json,.xml,.txt,.yml,.yaml,.md";
+	string[] Extensions => GetNvimExt().Split(',');
 	public CodeEditor.Installation[] Installations => new[]
 	{
 		new CodeEditor.Installation
@@ -34,6 +37,10 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		EditorGUILayout.LabelField("Arguments");
 		EditorPrefs.SetString(keyNvimArgs, EditorGUILayout.TextField(EditorPrefs.GetString(keyNvimArgs)));
 		EditorGUILayout.EndHorizontal();
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Extensions");
+		EditorPrefs.SetString(keyNvimExt, EditorGUILayout.TextField(GetNvimExt()));
+		EditorGUILayout.EndHorizontal();
 		var paths = CodeEditor.Editor.GetFoundScriptEditorPaths();
 		var vs = EditorPrefs.GetString(keyNvimVS);
 		var vsList = new List<string>();
@@ -57,8 +64,7 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		EditorPrefs.SetString(keyNvimVS, vsPathList[index]);
 		EditorGUILayout.EndHorizontal();
 		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("Generate");
-		if(GUILayout.Button("Regenerate"))
+		if(GUILayout.Button("Regenerate project files"))
 		{
 			Sync();
 		}
@@ -67,7 +73,7 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	}
 	public bool OpenProject(string filePath, int line, int column)
 	{
-		if(!IsCodeAsset(filePath))
+		if(!IsCodeAsset(filePath, Extensions))
 		{
 			return false;
 		}
@@ -94,7 +100,12 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 	}
 	public void SyncIfNeeded(string[] addedFiles, string[] deletedFiles, string[] movedFiles, string[] movedFromFiles, string[] importedFiles)
 	{
-		if(IsCodeAssets(addedFiles) || IsCodeAssets(deletedFiles) || IsCodeAssets(movedFiles) || IsCodeAssets(movedFromFiles) || IsCodeAssets(importedFiles))
+		var ext = Extensions;
+		if(IsCodeAssets(addedFiles, ext) ||
+		   IsCodeAssets(deletedFiles, ext) ||
+		   IsCodeAssets(movedFiles, ext) ||
+		   IsCodeAssets(movedFromFiles, ext) ||
+		   IsCodeAssets(importedFiles, ext))
 		{
 			Sync();
 		}
@@ -126,19 +137,37 @@ public class NeovimExternalCodeEditor : IExternalCodeEditor
 		CodeEditor.Editor.CurrentCodeEditor.SyncAll();
 		CodeEditor.SetExternalScriptEditor(EditorPrefs.GetString(keyNvimCmd));
 	}
-	bool IsCodeAssets(string[] files)
+	bool IsCodeAssets(string[] files, string[] ext)
 	{
 		foreach(var file in files)
 		{
-			if(IsCodeAsset(file))
+			if(IsCodeAsset(file, ext))
 			{
 				return true;
 			}
 		}
 		return false;
 	}
-	bool IsCodeAsset(string filePath)
+	bool IsCodeAsset(string filePath, string[] extList)
 	{
-		return Path.GetExtension(filePath) == ".cs";
+		var ext = Path.GetExtension(filePath);
+		foreach(var targetExt in extList)
+		{
+			if(ext == targetExt)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	string GetNvimExt()
+	{
+		var ext = EditorPrefs.GetString(keyNvimExt);
+		if(!string.IsNullOrEmpty(ext))
+		{
+			return ext;
+		}
+		EditorPrefs.SetString(keyNvimExt, defaultExt);
+		return defaultExt;
 	}
 }
